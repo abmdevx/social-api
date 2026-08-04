@@ -126,10 +126,10 @@ src/
 
 ```bash
 # Clone the repo
-git clone https://github.com/abdullahbutt09/stream-core.git
+git clone https://github.com/abmdevx/social-api.git
 
 # Move into the project
-cd stream-core
+cd social-api
 
 # Install dependencies
 npm install
