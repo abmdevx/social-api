@@ -1,4 +1,4 @@
-# 🎬 Stream-Core
+# 🎬 Social-Api
 
 A production-style YouTube-like backend built with **Node.js**, **Express**, and **MongoDB**.  
 Covers real-world concepts like JWT auth, Cloudinary media uploads, aggregation pipelines, and a full channel/subscription system.
