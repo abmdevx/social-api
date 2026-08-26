@@ -2,11 +2,12 @@ import type { TextareaHTMLAttributes } from "react";
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
+  containerClassName?: string;
 }
 
-export function Textarea({ label, className = "", id, ...props }: TextareaProps) {
+export function Textarea({ label, className = "", containerClassName = "", id, ...props }: TextareaProps) {
   return (
-    <label className="block space-y-2 text-sm font-medium text-slate-300" htmlFor={id}>
+    <label className={`block space-y-2 text-sm font-medium text-slate-300 ${containerClassName}`} htmlFor={id}>
       {label && <span>{label}</span>}
       <textarea
         id={id}
