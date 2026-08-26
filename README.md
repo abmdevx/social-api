@@ -85,39 +85,43 @@ Covers real-world concepts like JWT auth, Cloudinary media uploads, aggregation 
 ## 📁 Project Structure
 
 ```
-src/
-├── config/          # Environment variable exports
-├── controllers/     # Business logic (one file per module)
-│   ├── user.controller.js
-│   ├── video.controller.js
-│   ├── tweet.controller.js
-│   ├── comment.controller.js
-│   ├── like.controller.js
-│   ├── playlist.controller.js
-│   ├── subscription.controller.js
-│   ├── dashboard.controller.js
-│   └── healthCheck.controller.js
-├── db/              # MongoDB connection
-├── middlewares/
-│   ├── auth.middleware.js     # verifyJWT
-│   └── multer.middleware.js   # file uploads
-├── models/          # Mongoose schemas
-│   ├── user.models.js
-│   ├── video.models.js
-│   ├── tweet.models.js
-│   ├── comment.models.js
-│   ├── like.models.js
-│   ├── playlist.models.js
-│   └── subscription.models.js
-├── routes/          # Express routers (one file per module)
-├── utils/
-│   ├── Cloudinary.js          # upload/delete helpers
-│   ├── apiError.js            # custom error class
-│   ├── apiResponse.js         # standard response wrapper
-│   ├── asyncHandlerPromise.js
-│   └── asyncHandlerTrycatch.js
-├── app.js           # Express app setup, middleware, routes
-└── index.js         # Entry point – DB connect + server start
+backend/
+├── public/
+└── src/
+	├── config/          # Environment variable exports
+	├── controllers/     # Business logic (one file per module)
+	│   ├── user.controller.js
+	│   ├── video.controller.js
+	│   ├── tweet.controller.js
+	│   ├── comment.controller.js
+	│   ├── like.controller.js
+	│   ├── playlist.controller.js
+	│   ├── subscription.controller.js
+	│   ├── dashboard.controller.js
+	│   └── healthCheck.controller.js
+	├── db/              # MongoDB connection
+	├── middlewares/
+	│   ├── auth.middleware.js     # verifyJWT
+	│   └── multer.middleware.js   # file uploads
+	├── models/          # Mongoose schemas
+	│   ├── user.models.js
+	│   ├── video.models.js
+	│   ├── tweet.models.js
+	│   ├── comment.models.js
+	│   ├── like.models.js
+	│   ├── playlist.models.js
+	│   └── subscription.models.js
+	├── routes/          # Express routers (one file per module)
+	├── utils/
+	│   ├── Cloudinary.js          # upload/delete helpers
+	│   ├── apiError.js             # custom error class
+	│   ├── apiResponse.js          # standard response wrapper
+	│   ├── asyncHandlerPromise.js
+	│   └── asyncHandlerTrycatch.js
+	├── app.js           # Express app setup, middleware, routes
+	└── index.js         # Entry point – DB connect + server start
+
+frontend/            # Frontend application (to be added)
 ```
 
 ---
@@ -128,8 +132,9 @@ src/
 # Clone the repo
 git clone https://github.com/abmdevx/social-api.git
 
-# Move into the project
+# Move into the backend
 cd social-api
+cd backend
 
 # Install dependencies
 npm install
@@ -142,11 +147,11 @@ npm run dev
 
 ## 🔑 Environment Variables
 
-Create a `.env` file in the root and add:
+Create a `.env` file in `backend/` and add:
 
 ```env
 PORT=8000
-MONGODB_URI=your_mongodb_uri
+MONGO_URI=your_mongodb_uri
 CORS_ORIGIN=http://localhost:3000
 
 ACCESS_TOKEN_SECRET=your_access_token_secret
