@@ -1,0 +1,10 @@
+import { useEffect, useState } from "react";
+import { ImagePlus, UploadCloud } from "lucide-react";
+import { Button } from "../ui/Button";
+
+export function ProfileMediaCard({ label, currentUrl, accept, onUpload, loading }: { label: string; currentUrl?: string; accept: string; onUpload: (file: File) => Promise<void>; loading: boolean }) {
+  const [file, setFile] = useState<File | null>(null); const [filePreview, setFilePreview] = useState(""); const [submitting, setSubmitting] = useState(false); const preview = filePreview || currentUrl;
+  useEffect(() => () => { if (filePreview) URL.revokeObjectURL(filePreview); }, [filePreview]);
+  const submit = async () => { if (!file) return; setSubmitting(true); try { await onUpload(file); setFile(null); setFilePreview(""); } finally { setSubmitting(false); } };
+  return <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"><div className={`relative overflow-hidden rounded-xl bg-slate-950 ${label === "Avatar" ? "mx-auto aspect-square max-w-40 rounded-full" : "aspect-3/1"}`}>{preview ? <img src={preview} alt={`${label} preview`} className="size-full object-cover" /> : <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-600"><ImagePlus size={22} /><span className="text-xs">No {label.toLowerCase()} selected</span></div>}</div><label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 px-3 py-2.5 text-xs font-medium text-slate-400 hover:border-slate-500 hover:text-slate-200"><UploadCloud size={15} />Choose {label.toLowerCase()}<input type="file" accept={accept} className="sr-only" onChange={(event) => { const nextFile = event.target.files?.[0] || null; setFile(nextFile); if (nextFile) setFilePreview(URL.createObjectURL(nextFile)); }} /></label>{file && <Button className="mt-3 w-full" size="sm" variant="primary" onClick={() => void submit()} disabled={loading || submitting}>{loading || submitting ? "Uploading..." : `Save ${label.toLowerCase()}`}</Button>}</div>;
+}
