@@ -1,0 +1,22 @@
+{
+  "name": "social-api",
+  "version": "1.0.0",
+  "description": "Social API with backend and frontend integration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abmdevx/social-api.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abmdevx/social-api/issues"
+  },
+  "homepage": "https://github.com/abmdevx/social-api#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
