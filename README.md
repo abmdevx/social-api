@@ -260,9 +260,3 @@ Base URL: `http://localhost:8000/api/v1`
 | GET | `/dashboard/videos` | ✅ | Get creator studio videos |
 
 > ✅ = Requires Bearer Token &nbsp;&nbsp;|&nbsp;&nbsp; ❌ = Public Route
-
----
-
-## 📄 License
-
-This project is licensed under the [ISC License](LICENSE).
