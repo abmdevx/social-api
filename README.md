@@ -1,42 +1,81 @@
 # Streamline
 
-A video sharing and community platform: Express 5 + MongoDB backend and a React 19 frontend, both in strict TypeScript.
-The UI uses Tailwind CSS v4, shadcn/ui (Radix) and Lucide icons, with light, dark and system themes.
+Streamline is a full-stack video sharing and community platform. Creators upload videos, build a channel, post short
+updates and organise playlists. Viewers search and watch videos, like and comment, subscribe to channels, and keep a
+personal library of history, likes and playlists.
 
-Features: registration and login, video feed / trending / search, watch page with likes and comments, channels
-(videos, community posts, playlists), subscriptions, watch history, liked videos, playlists, a creator Studio
-(stats, upload with progress, edit, thumbnail change, publish toggle, delete) and account settings.
+The backend is an Express 5 + MongoDB REST API and the frontend is a React 19 single-page app. Both are written in
+strict TypeScript.
+
+## What you can do
+
+- Create an account with an avatar and cover image, sign in and out, change your password and edit your profile
+- Browse a home feed and a trending page, search videos, sort and paginate
+- Watch videos, like them, and see view counts
+- Comment on videos, edit or delete your comments, and like comments
+- Visit channels to see their videos, community posts and playlists, and subscribe or unsubscribe
+- Post short community updates, edit them, delete them one by one or in bulk, and like them
+- Save videos to playlists, and edit or delete playlists
+- Review your watch history, liked videos and subscriptions
+- Manage your videos in Studio: see channel stats, upload with a progress bar, edit details, change the thumbnail,
+  publish or unpublish, and delete
+- Switch between light, dark and system themes on any screen size
+
+## Tech stack
+
+| Part     | Technology                                                                              |
+| -------- | --------------------------------------------------------------------------------------- |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, Lucide icons, React Router     |
+| Backend  | Node.js, Express 5, TypeScript, Mongoose, Zod, JWT, bcrypt, Multer                      |
+| Database | MongoDB                                                                                 |
+| Media    | Cloudinary                                                                              |
+
+## Requirements
+
+- Node.js 20 or newer
+- A MongoDB database (local or Atlas)
+- A Cloudinary account
 
 ## Getting started
 
-Requirements: Node.js 20+, a MongoDB instance, a Cloudinary account.
-
 ```bash
-npm run install:all
-cp backend/.env.example backend/.env      # then fill in the values (see below)
-cp frontend/.env.example frontend/.env    # optional – the dev proxy works without it
-npm run dev                               # API on :8000, web on :5173
+npm run install:all                          # install backend and frontend
+cp backend/.env.example backend/.env         # fill in your values
+cp frontend/.env.example frontend/.env       # optional
+npm run dev                                  # API on :8000, web app on :5173
 ```
 
-Generate the two JWT secrets with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`.
-The API refuses to start with a readable message if the environment is invalid.
+Create the two JWT secrets (they must be different and at least 32 characters):
 
-If you are upgrading an existing database, run `npm --prefix backend run db:migrate-legacy` once
-(see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#database-migration)). All users must sign in again.
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
 
-## Scripts (run from the repo root)
+## Commands
 
-| Command                                     | Does                                                                              |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `npm run dev`                               | API (tsx watch) and web (Vite) together                                           |
-| `npm run typecheck`                         | `tsc` for backend and frontend                                                    |
-| `npm run lint`                              | ESLint for both                                                                   |
-| `npm test`                                  | Backend unit tests + frontend unit tests                                          |
-| `npm run build`                             | Compile backend to `backend/dist`, build frontend to `frontend/dist`              |
-| `npm --prefix backend run test:integration` | API tests against a real MongoDB (`TEST_MONGO_URI` required, use a throw-away DB) |
+| Command               | What it does                                      |
+| --------------------- | ------------------------------------------------- |
+| `npm run dev`         | Run the API and the web app together              |
+| `npm run build`       | Production build of both                          |
+| `npm run typecheck`   | Type-check both                                   |
+| `npm run lint`        | Lint both                                         |
+| `npm test`            | Run the unit tests of both                        |
 
-## Documentation
+## How it fits together
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – structure, request flow, auth design, frontend layout, deployment notes
-- [docs/SECURITY.md](docs/SECURITY.md) – what was fixed, what is still open, and what has and has not been verified
-- `backend/openapi.yaml` – API contract (served by the backend in development)
+The web app talks to the API under `/api/v1`. Sign-in sets httpOnly cookies, so the browser never handles a token
+directly. In development, Vite proxies `/api` to the backend, which keeps cookies same-origin without extra setup.
+
+## Upgrading from the original JavaScript version
+
+Back up your database, then run once: `npm --prefix backend run db:migrate-legacy`. Everyone has to sign in again,
+because sessions now use hashed, rotating refresh tokens.
+
+## Deployment
+
+- Serve the web app and the API under the same registrable domain where possible, and set `CORS_ORIGIN` to the web
+  app's origin.
+- For a cross-site setup, use HTTPS with `NODE_ENV=production` and `COOKIE_SAMESITE=none`.
+- Behind a proxy or load balancer, set `TRUST_PROXY` so rate limiting sees real client IPs.
+- Build with `npm run build`, run the API with `node backend/dist/index.js`, and serve `frontend/dist` as static files
+  with a fallback to `index.html`.
