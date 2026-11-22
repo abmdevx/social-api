@@ -1,21 +1,16 @@
 {
-  "name": "social-api",
-  "version": "1.0.0",
-  "description": "Social API with backend and frontend integration",
-  "main": "index.js",
+  "name": "streamline",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Streamline – video sharing and community platform (Express + MongoDB backend, React frontend, all TypeScript)",
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently -n api,web \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend",
+    "typecheck": "npm run typecheck --prefix backend && npm run typecheck --prefix frontend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+    "test": "npm test --prefix backend && npm test --prefix frontend"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abmdevx/social-api.git"
-  },
-  "keywords": [],
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/abmdevx/social-api/issues"
-  },
-  "homepage": "https://github.com/abmdevx/social-api#readme",
   "devDependencies": {
     "concurrently": "^9.2.1"
   }

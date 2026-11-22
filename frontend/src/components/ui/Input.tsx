@@ -1,18 +1,20 @@
-import type { InputHTMLAttributes } from "react";
+import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-}
-
-export function Input({ label, className = "", id, ...props }: InputProps) {
+function Input({ className, type, ...props }: ComponentProps<"input">) {
   return (
-    <label className="block space-y-2 text-sm font-medium text-slate-300" htmlFor={id}>
-      {label && <span>{label}</span>}
-      <input
-        id={id}
-        className={`h-11 w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 transition-colors focus:border-cyan-400/70 ${className}`}
-        {...props}
-      />
-    </label>
+    <input
+      type={type}
+      data-slot="input"
+      className={cn(
+        "flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30",
+        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
+        className
+      )}
+      {...props}
+    />
   );
 }
+
+export { Input };
