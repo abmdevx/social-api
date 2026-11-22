@@ -1,55 +1,68 @@
-import axios, { type InternalAxiosRequestConfig } from "axios";
-import { clearTokens, getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from "../utils/storage";
+import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
+import type { ApiResponse } from "@/types/models";
 
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+/** Fired when the session can no longer be refreshed; the auth context listens for it. */
+export const UNAUTHORIZED_EVENT = "streamline:unauthorized";
 
-apiClient.interceptors.request.use((config) => {
-  const accessToken = getAccessToken();
+const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
 
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
+/**
+ * Authentication lives in httpOnly cookies set by the API, so no token ever touches JavaScript
+ * (nothing in localStorage for an XSS bug to steal).
+ */
+export const apiClient = axios.create({ baseURL, withCredentials: true, timeout: 30_000 });
 
-  return config;
-});
+/** Used for the refresh call itself so it never recurses into the interceptor below. */
+const bareClient = axios.create({ baseURL, withCredentials: true, timeout: 15_000 });
+
+const NO_REFRESH_PATHS = ["/users/login", "/users/register", "/users/refresh-token"];
+
+let refreshInFlight: Promise<void> | null = null;
+
+/**
+ * Refresh tokens are single-use: the API rotates them and treats a reused one as theft. That makes
+ * concurrent refreshes dangerous, so exactly one runs per tab (shared promise) and, where the Web
+ * Locks API exists, one at a time across tabs (they share the same cookie).
+ */
+export function refreshSession(): Promise<void> {
+  refreshInFlight ??= (async () => {
+    const run = async () => {
+      await bareClient.post("/users/refresh-token");
+    };
+    try {
+      if (typeof navigator !== "undefined" && "locks" in navigator) {
+        await navigator.locks.request("streamline:refresh", run);
+      } else {
+        await run();
+      }
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+  return refreshInFlight;
+}
+
+type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
-    const isRefreshRequest = originalRequest?.url?.includes("/users/refresh-token");
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) throw error;
+    const config = error.config as RetriableConfig | undefined;
+    const skip =
+      !config || config._retried || NO_REFRESH_PATHS.some((path) => config.url?.includes(path));
+    if (error.response?.status !== 401 || skip) throw error;
 
-    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry || isRefreshRequest) {
-      return Promise.reject(error);
-    }
-
-    const refreshTokenValue = getRefreshToken();
-    if (!refreshTokenValue) {
-      clearTokens();
-      window.dispatchEvent(new Event("auth:unauthorized"));
-      return Promise.reject(error);
-    }
-
-    originalRequest._retry = true;
+    config._retried = true;
     try {
-      const refreshResponse = await apiClient.post("/users/refresh-token", { refreshToken: refreshTokenValue });
-      const { newAccessToken, newRefreshToken } = refreshResponse.data.data;
-      setAccessToken(newAccessToken);
-      setRefreshToken(newRefreshToken);
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-      return apiClient(originalRequest);
-    } catch (refreshError) {
-      clearTokens();
-      window.dispatchEvent(new Event("auth:unauthorized"));
-      return Promise.reject(refreshError);
+      await refreshSession();
+    } catch {
+      window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+      throw error;
     }
-  },
+    return apiClient(config);
+  }
 );
 
-export default apiClient;
+/** Unwraps the `{ data }` envelope. */
+export const unwrap = <T>(response: AxiosResponse<ApiResponse<T>>): T => response.data.data;

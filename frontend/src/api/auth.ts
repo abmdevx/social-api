@@ -1,6 +1,5 @@
-import apiClient from "./client";
-import type { ApiResponse } from "../types/api";
-import type { LoginResponse, RefreshResponse, User } from "../types/auth";
+import { apiClient, unwrap } from "./client";
+import type { ApiResponse, LoginResult, User } from "@/types/models";
 
 export interface LoginInput {
   identifier: string;
@@ -16,41 +15,31 @@ export interface RegisterInput {
   coverImage?: File;
 }
 
-export async function login(input: LoginInput) {
-  const body = input.identifier.includes("@")
-    ? { email: input.identifier, password: input.password }
-    : { username: input.identifier, password: input.password };
-  const response = await apiClient.post<ApiResponse<LoginResponse>>("/users/login", body);
-  return response.data.data;
+export async function login({ identifier, password }: LoginInput): Promise<User> {
+  const body = identifier.includes("@")
+    ? { email: identifier, password }
+    : { username: identifier, password };
+  return unwrap(await apiClient.post<ApiResponse<LoginResult>>("/users/login", body)).user;
 }
 
-export async function register(input: RegisterInput) {
-  const formData = new FormData();
-  formData.append("username", input.username);
-  formData.append("email", input.email);
-  formData.append("fullName", input.fullName);
-  formData.append("password", input.password);
-  formData.append("avatar", input.avatar);
-  if (input.coverImage) formData.append("coverImage", input.coverImage);
-
-  const response = await apiClient.post<ApiResponse<User>>("/users/register", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+export async function register(input: RegisterInput): Promise<string> {
+  const form = new FormData();
+  form.append("username", input.username);
+  form.append("email", input.email);
+  form.append("fullName", input.fullName);
+  form.append("password", input.password);
+  form.append("avatar", input.avatar);
+  if (input.coverImage) form.append("coverImage", input.coverImage);
+  const response = await apiClient.post<ApiResponse<User>>("/users/register", form, {
+    timeout: 120_000,
   });
-  return response.data;
+  return response.data.message;
 }
 
-export async function getCurrentUser() {
-  const response = await apiClient.get<ApiResponse<User>>("/users/get-current-user");
-  return response.data.data;
+export async function getCurrentUser(): Promise<User> {
+  return unwrap(await apiClient.get<ApiResponse<User>>("/users/get-current-user"));
 }
 
-export async function refreshToken(refreshTokenValue: string) {
-  const response = await apiClient.post<ApiResponse<RefreshResponse>>("/users/refresh-token", {
-    refreshToken: refreshTokenValue,
-  });
-  return response.data.data;
-}
-
-export async function logout() {
-  await apiClient.post<ApiResponse<unknown>>("/users/logout");
+export async function logout(): Promise<void> {
+  await apiClient.post("/users/logout");
 }

@@ -1,19 +1,17 @@
-import type { TextareaHTMLAttributes } from "react";
+import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  containerClassName?: string;
-}
-
-export function Textarea({ label, className = "", containerClassName = "", id, ...props }: TextareaProps) {
+function Textarea({ className, ...props }: ComponentProps<"textarea">) {
   return (
-    <label className={`block space-y-2 text-sm font-medium text-slate-300 ${containerClassName}`} htmlFor={id}>
-      {label && <span>{label}</span>}
-      <textarea
-        id={id}
-        className={`min-h-28 w-full resize-y rounded-xl border border-slate-800 bg-slate-900/80 p-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 transition-colors focus:border-cyan-400/70 ${className}`}
-        {...props}
-      />
-    </label>
+    <textarea
+      data-slot="textarea"
+      className={cn(
+        "flex field-sizing-content min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30",
+        className
+      )}
+      {...props}
+    />
   );
 }
+
+export { Textarea };
