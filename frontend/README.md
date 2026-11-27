@@ -1,5 +1,11 @@
 # Streamline frontend
 
+> Part of the Streamline project. See the [main README](../README.md) for the full preview and project overview.
+
+<p align="center">
+  <img src="public/screenshots/streamline-cover.png" alt="Streamline preview" width="100%" />
+</p>
+
 The web app for Streamline: a responsive single-page application for watching videos, following channels and managing
 your own content. It is built with React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui and Lucide icons, with light,
 dark and system themes.
@@ -24,6 +30,8 @@ Node.js 20+ and the Streamline backend running (default `http://localhost:8000`)
 
 ## Getting started
 
+Run these from the `frontend/` folder:
+
 ```bash
 npm install
 cp .env.example .env      # optional
@@ -34,39 +42,59 @@ In development Vite forwards `/api` requests to the backend, so cookies stay sam
 
 ## Environment variables
 
-| Variable              | Default                 | Purpose                                                      |
-| --------------------- | ----------------------- | ------------------------------------------------------------ |
-| `VITE_API_URL`        | empty (uses `/api/v1`)  | Full API URL; only needed when the API is on another origin  |
+| Variable              | Default                 | Purpose                                                     |
+| --------------------- | ----------------------- | ----------------------------------------------------------- |
+| `VITE_API_URL`        | empty (uses `/api/v1`)  | Full API URL; only needed when the API is on another origin |
 | `VITE_DEV_API_TARGET` | `http://localhost:8000` | Where the dev server forwards `/api` (development only)     |
 
 ## Commands
 
-| Command             | What it does                         |
-| ------------------- | ------------------------------------ |
-| `npm run dev`       | Start the dev server                 |
+| Command             | What it does                          |
+| ------------------- | ------------------------------------- |
+| `npm run dev`       | Start the dev server                  |
 | `npm run build`     | Type-check, then build for production |
-| `npm run preview`   | Serve the production build locally   |
-| `npm run typecheck` | Type-check                           |
-| `npm run lint`      | Lint                                 |
-| `npm test`          | Unit tests for the helper functions  |
+| `npm run preview`   | Serve the production build locally    |
+| `npm run typecheck` | Type-check                            |
+| `npm run lint`      | Lint                                  |
+| `npm test`          | Unit tests for the helper functions   |
+
+## Project structure
+
+```text
+src/
+├── api/          # Axios client and one module per API area
+├── components/   # common/ (cards, dialogs, states), layout/ (header, sidebar), ui/ (shadcn/ui)
+├── context/      # Auth and theme providers
+├── hooks/        # useAuth, useTheme, useAsync
+├── lib/          # Formatting, error and file-validation helpers
+├── pages/        # Route pages (watch/ and studio/ hold sub-components)
+├── types/        # Shared TypeScript models
+├── App.tsx       # Routes
+└── main.tsx      # Entry point
+```
 
 ## Pages
 
-| Page                       | What it does                                                          |
-| -------------------------- | --------------------------------------------------------------------- |
-| Sign in / Create account   | Authentication; signed-in users are sent home                         |
-| Home                       | Latest videos with search, sorting and pagination                     |
-| Trending                   | Most viewed videos                                                    |
-| Watch                      | Player, likes, subscribe, comments, save to playlist                  |
-| Channel                    | Videos, community posts and playlists of a creator                    |
-| Community                  | Write and manage your own short posts                                 |
-| Subscriptions              | Channels you follow, with unsubscribe                                 |
-| History and Liked videos   | Your viewing history and liked videos                                 |
-| Playlists                  | Create, edit, delete and fill playlists                               |
-| Studio                     | Stats, upload with progress, edit, thumbnail, publish, delete         |
-| Settings                   | Avatar, cover image, name, email and password                         |
+| Page                     | Route                                  | What it does                                                  |
+| ------------------------ | -------------------------------------- | ------------------------------------------------------------- |
+| Sign in / Create account | `/login`, `/register`                  | Authentication; signed-in users are sent home                 |
+| Home                     | `/`                                    | Latest videos with search, sorting and pagination             |
+| Trending                 | `/explore`                             | Most viewed videos                                            |
+| Watch                    | `/watch/:videoId`                      | Player, likes, subscribe, comments, save to playlist          |
+| Channel                  | `/c/:username`                         | Videos, community posts and playlists of a creator            |
+| Community                | `/tweets`                              | Write and manage your own short posts                         |
+| Subscriptions            | `/subscriptions`                       | Channels you follow, with unsubscribe                         |
+| History and Liked videos | `/history`, `/liked`                   | Your viewing history and liked videos                         |
+| Playlists                | `/playlists`, `/playlists/:playlistId` | Create, edit, delete and fill playlists                       |
+| Studio                   | `/studio`                              | Stats, upload with progress, edit, thumbnail, publish, delete |
+| Settings                 | `/settings`                            | Avatar, cover image, name, email and password                 |
 
 Signed-out visitors are redirected to the sign-in page and returned to where they were afterwards.
+
+## Upload limits
+
+Images (avatar, cover, thumbnails) can be up to 5 MB and videos up to 100 MB. The app checks the size before uploading
+and shows a clear message if a file is too large.
 
 ## How it works
 
